@@ -51,6 +51,12 @@ public class WebScraperResource {
         return gson.toJson(results);
     }
 
+    @Operation(summary = "Scraping a specific URL for links",
+            tags = {"scrape"},
+            responses = {
+                    @ApiResponse(
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = TagDTO.class))),
+                    @ApiResponse(responseCode = "200", description = "The requested web scraping")})
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
