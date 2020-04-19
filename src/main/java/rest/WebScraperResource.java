@@ -2,13 +2,15 @@ package rest;
 
 import java.util.List;
 import javax.annotation.security.RolesAllowed;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
-import javax.ws.rs.Produces;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
 import javax.ws.rs.core.MediaType;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.sun.corba.se.impl.oa.poa.POAPolicyMediatorImpl_NR_UDS;
+import dtos.LinkDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -48,5 +50,16 @@ public class WebScraperResource {
             results.add(new TagDTO(tc));
         }
         return gson.toJson(results);
+    }
+
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public String scrapeForLinks(String jsonString) {
+        JsonObject json = new JsonParser().parse(jsonString).getAsJsonObject();
+        String url = json.get("url").getAsString();
+        List<LinkDTO> dtos = WebScraper.findLinks(url);
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        return gson.toJson(dtos);
     }
 }

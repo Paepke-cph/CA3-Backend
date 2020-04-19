@@ -1,6 +1,7 @@
 package webscraper;
 
 import concurrent.ParallelWorker;
+import dtos.LinkDTO;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +38,7 @@ public class WebScraper {
         return urls;
     }
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void TestRun() throws InterruptedException {
         long start = System.nanoTime();
         List<TagCounter> list1 = WebScraper.runParallel();
         long half = System.nanoTime();
@@ -49,5 +50,23 @@ public class WebScraper {
         System.out.println("Base Parallel: " + firstRun + "ms");
         System.out.println("Generic Parallel: " + lastRun + "ms");
         System.out.println("How come the Generic version is 4x times faster than the regular parallel function?????");
+    }
+
+    public static List<LinkDTO> findLinks(String url) {
+        List<LinkTracker> urls = new ArrayList();
+        urls.add(new LinkTracker(url,0));
+        ParallelWorker<LinkTracker> pw = new ParallelWorker<>();
+        pw.getAsParallel(urls);
+
+        List<LinkDTO> dtos = new ArrayList<>();
+        for(LinkTracker tracker : urls) {
+            dtos.add(LinkDTO.toLinkDTO(tracker));
+        }
+        return dtos;
+    }
+
+    public static void main(String[] args) {
+        List<LinkDTO> dtos = findLinks("https://www.fck.dk");
+        System.out.println("Done");
     }
 }
