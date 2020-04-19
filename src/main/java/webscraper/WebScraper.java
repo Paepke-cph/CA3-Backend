@@ -4,10 +4,14 @@ import concurrent.ParallelWorker;
 import dtos.LinkDTO;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.*;
 
 public class WebScraper {
+    private static Map<String,CacheResult> cachedResults = new HashMap<>();
+
     public static List<TagCounter> runGeneric() {
         List<TagCounter> urls = new ArrayList();
         urls.add(new TagCounter("https://www.fck.dk"));
@@ -53,6 +57,14 @@ public class WebScraper {
     }
 
     public static List<LinkDTO> findLinks(String url) {
+        if(cachedResults.containsKey(url)) {
+            CacheResult found = cachedResults.get(url);
+            if (found.isStale()) {
+                cachedResults.remove(found);
+            } else {
+                return found.getResults();
+            }
+        }
         List<LinkTracker> urls = new ArrayList();
         urls.add(new LinkTracker(url,0));
         ParallelWorker<LinkTracker> pw = new ParallelWorker<>();
@@ -62,11 +74,13 @@ public class WebScraper {
         for(LinkTracker tracker : urls) {
             dtos.add(LinkDTO.toLinkDTO(tracker));
         }
+        cachedResults.put(url,new CacheResult(url,dtos));
         return dtos;
     }
 
     public static void main(String[] args) {
         List<LinkDTO> dtos = findLinks("https://www.fck.dk");
+        List<LinkDTO> dtos2 = findLinks("https://www.fck.dk");
         System.out.println("Done");
     }
 }
